@@ -16,11 +16,16 @@ defmodule Otomai.Mixfile do
   def application do
     [
       mod: {Otomai, []},
-      applications: ~w(
-        logger
-        ranch
-      )a,
+      applications: applications(Mix.env),
     ]
+  end
+
+  defp applications(:dev) do
+    applications(:prod) ++ ~w(reprise)a
+  end
+
+  defp applications(:prod) do
+    ~w(logger ranch)a
   end
 
   # Dependencies can be Hex packages:
