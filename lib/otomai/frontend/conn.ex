@@ -10,7 +10,7 @@ defmodule Otomai.Frontend.Conn do
             adapter:   nil,
             behaviour: nil,
             halted:    false,
-            assigns:   %{}
+            assigns:   %{state: 0}
 
   @doc """
     Send data to a connection.
@@ -48,5 +48,14 @@ defmodule Otomai.Frontend.Conn do
   def close(conn) do
     :ok = conn.adapter.close(conn.handle)
     %T{conn | halted: true}
+  end
+
+  @doc """
+    Assign an attribute to a connection.
+  """
+  @spec assign(t, atom, term) :: t
+  def assign(conn, key, value) do
+    assigns = Map.put(conn.assigns, key, value)
+    %T{conn | assigns: assigns}
   end
 end

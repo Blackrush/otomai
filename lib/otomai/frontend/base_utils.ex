@@ -1,26 +1,34 @@
-defmodule Otomai.Frontend.BaseUtils do 
-  defmacro forward(mod, opts) do
-    prefix = Keyword.get(opts, :prefix)
+defmodule Otomai.Frontend.BaseUtils do
+  alias Otomai.Frontend.Conn
 
-    conn = case opts[:state] do
-      nil ->
-        Macro.var(:conn, nil)
-
-      state ->
-        quote do
-          conn = %Conn{state: unquote(state)}
-        end
+  defmacro forward(mod, opts \\ []) do
+    block = quote do
+      unquote(mod).handle(var!(conn), var!(msg))
     end
 
-    quote do
-      def handle(unquote(conn), unquote(prefix) <> rest) do
-        unquote(mod).handle(var!(conn), rest)
-      end
-    end
+    gen_handler(opts, block)
   end
 
-  defmacro defhandler(prefix, opts) do
-    block = Keyword.get(opts, :do)
+  defmacro defhandler(opts \\ [], block)
+
+  defmacro defhandler(opts, do: block) when is_list(opts) do
+    gen_handler(opts, block)
+  end
+
+  defmacro defhandler(prefix, do: block) when is_binary(prefix) do
+    gen_handler([prefix: prefix], block)
+  end
+
+  defp gen_handler(opts, block) do
+     msg = case opts[:prefix] do
+      nil ->
+        Macro.var(:msg, nil)
+
+      prefix ->
+        quote do
+          unquote(prefix) <> var!(msg)
+        end
+    end
 
     conn = case opts[:state] do
       nil ->
@@ -28,12 +36,12 @@ defmodule Otomai.Frontend.BaseUtils do
 
       state ->
         quote do
-          var!(conn) = %Conn{state: unquote(state)}
+          var!(conn) = %Conn{assigns: %{state: unquote(state)}}
         end
     end
 
     quote do
-      def handle(unquote(conn), unquote(prefix) <> var!(msg)) do
+      def handle(unquote(conn), unquote(msg)) do
         unquote(block)
       end
     end
