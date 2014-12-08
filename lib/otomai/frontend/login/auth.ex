@@ -1,11 +1,12 @@
 defmodule Otomai.Frontend.Login.Auth do
   use Otomai.Frontend.Base
 
-  defhandler do
+  alias Otomai.Frontend.Login.Realm
+
+  def handle(conn, msg) do
     [username, password] = String.split(msg, "\n#1", parts: 2)
 
-    conn
-      |> Conn.assign(:state, 2)
-      |> Conn.assign(:user, %{username: username, password: password})
+    conn |> Conn.set_behaviour(Realm)
+         |> Conn.assign(:user, %{username: username, password: password})
   end
 end

@@ -3,7 +3,7 @@ defmodule Otomai.Frontend.Login.Realm do
 
   ## Queue
   defhandler "Af" do
-    raise "todo"
+    conn |> Conn.send("Af1;1;1;1;1")
   end
 
   ## Character list

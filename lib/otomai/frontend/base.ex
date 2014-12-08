@@ -65,8 +65,7 @@ defmodule Otomai.Frontend.Base do
   defp loop(conn = %Conn{halted: false}) do
     case Conn.recv(conn) do
       {:ok, data} ->
-        Logger.debug "RCV #{data}"
-        conn.behaviour.handle(conn, data) |> loop
+        data |> tokenize |> execute(conn) |> loop
       _ ->
         Conn.close(conn) |> loop
     end
@@ -80,5 +79,22 @@ defmodule Otomai.Frontend.Base do
 
   defp tokenize(data) do
     String.split(data, "\n\0")
+  end
+
+  defp execute([], conn) do
+    conn
+  end
+
+  defp execute(["" | rest], conn) do
+    execute(rest, conn)
+  end
+
+  defp execute([data | rest], conn = %Conn{halted: false}) do
+    Logger.debug "RCV #{data}"
+    execute(rest, conn.behaviour.handle(conn, data))
+  end
+
+  defp execute(_xs, conn) do
+    conn
   end
 end

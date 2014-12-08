@@ -60,4 +60,12 @@ defmodule Otomai.Frontend.Conn do
     assigns = Map.put(conn.assigns, key, value)
     %T{conn | assigns: assigns}
   end
+
+  @doc """
+    Set the behaviour of a connection.
+  """
+  @spec set_behaviour(t, module) :: t
+  def set_behaviour(conn, behaviour) do
+    %T{conn | behaviour: behaviour}
+  end
 end
