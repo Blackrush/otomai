@@ -1,4 +1,5 @@
 defmodule Otomai.Frontend.Base do
+  require Logger
   use Behaviour
 
   alias Otomai.Frontend.Conn
@@ -14,10 +15,20 @@ defmodule Otomai.Frontend.Base do
         conn
       end
 
-      defoverridable [handle: 2]
+      def connect(conn) do
+        conn
+      end
+
+      def disconnect(conn) do
+        conn
+      end
+
+      defoverridable [handle: 2, connect: 1, disconnect: 1]
     end
   end
 
+  defcallback connect(conn :: Conn.t) :: Conn.t
+  defcallback disconnect(conn :: Conn.t) :: Conn.t
   defcallback handle(conn :: Conn.t, data :: binary) :: Conn.t
 
   def start_link(opts) do
@@ -25,6 +36,8 @@ defmodule Otomai.Frontend.Base do
     listeners = Keyword.get(opts, :listeners)
     port      = Keyword.get(opts, :port)
     behaviour = Keyword.get(opts, :behaviour)
+
+    Logger.info "#{name} will listen on #{port} using #{listeners} workers"
 
     :ranch.start_listener name,
       listeners,
@@ -41,21 +54,31 @@ defmodule Otomai.Frontend.Base do
 
   def init(ref, socket, transport, behaviour) do
     :ok = :ranch.accept_ack(ref)
+
+    Logger.debug "OPN"
     
-    conn = %Conn{adapter: transport, handle: socket, behaviour: behaviour}
-    loop(conn)
+    %Conn{adapter: transport, handle: socket, behaviour: behaviour}
+      |> behaviour.connect
+      |> loop
   end
 
   defp loop(conn = %Conn{halted: false}) do
     case Conn.recv(conn) do
       {:ok, data} ->
+        Logger.debug "RCV #{data}"
         conn.behaviour.handle(conn, data) |> loop
       _ ->
-        :ok
+        Conn.close(conn) |> loop
     end
   end
 
-  defp loop(_conn) do
+  defp loop(conn) do
+    conn.behaviour.disconnect(conn)
+    Logger.debug "CLS"
     :ok
+  end
+
+  defp tokenize(data) do
+    String.split(data, "\n\0")
   end
 end

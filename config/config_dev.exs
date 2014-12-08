@@ -5,7 +5,8 @@ config Otomai.Backend,
   port:   5554
 
 config Otomai.Frontend.Login,
-  port: 5555
+  port: 5555,
+  listeners: 1
 
 config Otomai.Frontend.Realm,
   port: 5556

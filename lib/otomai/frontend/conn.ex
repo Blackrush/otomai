@@ -4,6 +4,7 @@ defmodule Otomai.Frontend.Conn do
   """
   @type t :: __MODULE__
 
+  require Logger
   alias __MODULE__, as: T
 
   defstruct handle:    nil,
@@ -19,7 +20,8 @@ defmodule Otomai.Frontend.Conn do
   def send(conn, data)
 
   def send(conn = %T{halted: false}, data) do
-    :ok = conn.adapter.send(conn.handle, data)
+    Logger.debug "SND #{data}"
+    :ok = conn.adapter.send(conn.handle, data <> "\0")
     conn
   end
 

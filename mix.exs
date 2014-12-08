@@ -18,6 +18,7 @@ defmodule Otomai.Mixfile do
       mod: {Otomai, []},
       applications: ~w(
         logger
+        ranch
       )a,
     ]
   end

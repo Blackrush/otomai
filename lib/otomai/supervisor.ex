@@ -7,13 +7,13 @@ defmodule Otomai.Supervisor do
 
   def init(config) do
     supervise children(config),
-      name: __MODULE__,
+      name:     __MODULE__,
       strategy: :one_for_one
   end
 
-  defp children(_config) do
+  defp children(config) do
     [
-
+      worker(Otomai.Frontend.Login, [Keyword.get(config, Otomai.Frontend.Login)]),
     ]
   end
 end
