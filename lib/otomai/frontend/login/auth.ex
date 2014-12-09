@@ -23,7 +23,7 @@ defmodule Otomai.Frontend.Login.Auth do
         conn |> Conn.send("AlEf") |> Conn.close
 
       {:error, :not_enough_rights} ->
-        conn |> COnn.send("AlEb") |> Conn.close
+        conn |> Conn.send("AlEb") |> Conn.close
 
       {:error, _} ->
         # we didnt think of all cases, just close the connection for now
