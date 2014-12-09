@@ -5,14 +5,16 @@ defmodule Otomai.Backend.UserRepoTest do
 
   test "insert a user" do
     {:ok, repo} = UserRepo.start_link
-    user = %User{id: 1, username: "test"}
+    user = %User{id: 0, username: "test"}
 
     assert Dict.size(UserRepo.all(repo)) == 0
 
-    UserRepo.insert(repo, user)
+    new_user = UserRepo.insert(repo, user)
 
     all = UserRepo.all(repo)
     assert Dict.size(all) == 1
+    assert(new_user.id == 1)
+    assert(new_user.username == user.username)
   end
 
   test "update a user" do

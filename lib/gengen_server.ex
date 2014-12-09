@@ -4,8 +4,12 @@ defmodule GenGenServer do
       import GenGenServer
       @behaviour :gen_server
 
-      def start_link(name \\ __MODULE__, args \\ [], options \\ []) do
-        :gen_server.start_link(name, __MODULE__, args, options)
+      def start_link(args \\ [], options \\ []) do
+        if name = options[:name] do
+          :gen_server.start_link(name, __MODULE__, args, Keyword.delete(options, :name))
+        else
+          :gen_server.start_link(__MODULE__, args, options)
+        end
       end
 
       def handle_call(_, _, state) do

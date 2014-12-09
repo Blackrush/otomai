@@ -1,18 +1,28 @@
 defmodule Otomai.Backend.UserRepo do
   use GenGenServer
   require Logger
+  alias Otomai.User
+
+  defmodule State do
+    defstruct next_id: 1,
+              registry: %{}
+  end
 
   initialize do
-    {:ok, %{}}
+    {:ok, %State{}}
   end
 
   @doc """
-    Insert a user in the repository.
+    Insert a user in the repository and give it a unique identifier.
   """
-  #spec insert(user :: Otomai.User.t) :: nil
-  defcast insert(user) do
-    new_state = Dict.put_new(state, user.id, user)
-    {:noreply, new_state}
+  #spec insert(user :: Otomai.User.t) :: Otomai.User.t
+  defcall insert(user) do
+    new_id = state.next_id
+    new_user = %User{user | id: new_id}
+
+    new_registry = Dict.put_new(state.registry, new_id, new_user)
+
+    {:reply, new_user, %State{next_id: new_id + 1, registry: new_registry}}
   end
 
   @doc """
@@ -20,8 +30,8 @@ defmodule Otomai.Backend.UserRepo do
   """
   #spec update(user :: Otomai.User.t) :: nil
   defcast update(user) do
-    new_state = Dict.put(state, user.id, user)
-    {:noreply, new_state}
+    new_registry = Dict.put(state.registry, user.id, user)
+    {:noreply, %State{state | registry: new_registry}}
   end
 
   @doc """
@@ -29,8 +39,9 @@ defmodule Otomai.Backend.UserRepo do
   """
   #spec remove(user :: Otomai.User.t | integer) :: nil
   defcast remove(user) do
-    new_state = Dict.delete(state, (if is_integer(user), do: user, else: user.id))
-    {:noreply, new_state}
+    id = if is_integer(user), do: user, else: user.id
+    new_registry = Dict.delete(state.registry, id)
+    {:noreply, %State{state | registry: new_registry}}
   end
 
   @doc """
@@ -38,7 +49,7 @@ defmodule Otomai.Backend.UserRepo do
   """
   #spec find_by_id(id :: integer) :: {:ok, Otomai.User.t} | :not_found
   defcall find_by_id(id) do
-    case Dict.fetch(state, id) do
+    case Dict.fetch(state.registry, id) do
       {:ok, user} ->
         {:reply, {:ok, user}, state}
       :error ->
@@ -51,8 +62,8 @@ defmodule Otomai.Backend.UserRepo do
   """
   #spec find_by_username(username :: String.t) :: {:ok, Otomai.User.t} | :not_found
   defcall find_by_username(username) do
-    user = state |> Dict.values
-                 |> Enum.find(fn(x) -> x.username == username end)
+    user = state.registry |> Dict.values
+                          |> Enum.find(fn(x) -> x.username == username end)
 
     case user do
       nil ->
@@ -66,12 +77,12 @@ defmodule Otomai.Backend.UserRepo do
   @doc false
   #spec all() :: %{integer => Otomai.User.t}
   defcall all do
-    {:reply, state, state}
+    {:reply, state.registry, state}
   end
 
   @doc false
   #spec set_all(new_state :: %{integer => Otomai.User.t}) :: nil
-  defcall set_all(new_state) do
-    {:reply, nil, new_state}
+  defcall set_all(new_registry) do
+    {:reply, nil, %State{state | registry: new_registry}}
   end
 end
