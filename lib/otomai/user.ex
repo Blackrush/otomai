@@ -1,7 +1,8 @@
 defmodule Otomai.User do
   @type t :: %__MODULE__{}
 
-  defstruct username:        "",
+  defstruct id:              0,
+            username:        "",
             password:        "",
             salt:            "",
             nickname:        "",

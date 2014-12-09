@@ -1,5 +1,6 @@
 defmodule Otomai.Backend.UserRepo do
   use GenGenServer
+  require Logger
 
   initialize do
     {:ok, %{}}
@@ -60,5 +61,17 @@ defmodule Otomai.Backend.UserRepo do
       _ ->
         {:reply, {:ok, user}, state}
     end
+  end
+
+  @doc false
+  #spec all() :: %{integer => Otomai.User.t}
+  defcall all do
+    {:reply, state, state}
+  end
+
+  @doc false
+  #spec set_all(new_state :: %{integer => Otomai.User.t}) :: nil
+  defcall set_all(new_state) do
+    {:reply, nil, new_state}
   end
 end

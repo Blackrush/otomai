@@ -4,6 +4,10 @@ defmodule GenGenServer do
       import GenGenServer
       @behaviour :gen_server
 
+      def start_link(args \\ [], options \\ []) do
+        :gen_server.start_link(__MODULE__, args, options)
+      end
+
       def handle_call(_, _, state) do
         {:noreply, state}
       end
@@ -57,7 +61,7 @@ defmodule GenGenServer do
 
     quote do
       def unquote(event)(ref, unquote_splicing(params)) do
-        :gen_server.cast(ref, [unquote_splicing(params)])
+        :gen_server.cast(ref, unquote(pattern))
       end
 
       def handle_cast(unquote(pattern), var!(state)) do
@@ -73,7 +77,7 @@ defmodule GenGenServer do
 
     quote do
       def unquote(event)(ref, unquote_splicing(params), timeout \\ :infinity) do
-        :gen_server.call(ref, [unquote_splicing(params)], timeout)
+        :gen_server.call(ref, unquote(pattern), timeout)
       end
 
       def handle_call(unquote(pattern), var!(sender), var!(state)) do
