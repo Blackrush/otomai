@@ -20,6 +20,10 @@ defmodule Otomai.Mixfile do
     ]
   end
 
+  defp applications(:test) do
+    applications(:prod)
+  end
+
   defp applications(:dev) do
     applications(:prod) ++ ~w(reprise)a
   end
@@ -37,6 +41,10 @@ defmodule Otomai.Mixfile do
   #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
   #
   # Type `mix help deps` for more examples and options
+  defp deps(:test) do
+    deps(:prod)
+  end
+
   defp deps(:dev) do
     deps(:prod) ++ [
       reprise: "~> 0.3.0",
