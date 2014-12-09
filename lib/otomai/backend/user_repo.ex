@@ -1,6 +1,5 @@
 defmodule Otomai.Backend.UserRepo do
   use GenGenServer
-  alias Otomai.User
 
   initialize do
     {:ok, %{}}
@@ -9,7 +8,7 @@ defmodule Otomai.Backend.UserRepo do
   @doc """
     Insert a user in the repository.
   """
-  @spec insert(user :: User.t) :: nil
+  #spec insert(user :: Otomai.User.t) :: nil
   defcast insert(user) do
     new_state = Dict.put_new(state, user.id, user)
     {:noreply, new_state}
@@ -18,34 +17,25 @@ defmodule Otomai.Backend.UserRepo do
   @doc """
     Update a user from the repository.
   """
-  @spec update(user :: User.t) :: nil
+  #spec update(user :: Otomai.User.t) :: nil
   defcast update(user) do
     new_state = Dict.put(state, user.id, user)
     {:noreply, new_state}
   end
 
   @doc """
-    Remove a user from the repository using its identifier.
-  """
-  @spec remove(user_id :: integer) :: nil
-  defcast remove(user_id) when is_integer(user_id) do
-    new_state = Dict.delete(state, user_id)
-    {:noreply, new_state}
-  end
-
-  @doc """
     Remove a user from the repository.
   """
-  @spec remove(user :: User.t) :: nil
+  #spec remove(user :: Otomai.User.t | integer) :: nil
   defcast remove(user) do
-    new_state = Dict.delete(state, user.id)
+    new_state = Dict.delete(state, (if is_integer(user), do: user, else: user.id))
     {:noreply, new_state}
   end
 
   @doc """
     Find a user in the repository using its identifier.
   """
-  @spec find_by_id(id :: integer) :: {:ok, User.t} | :not_found
+  #spec find_by_id(id :: integer) :: {:ok, Otomai.User.t} | :not_found
   defcall find_by_id(id) do
     case Dict.fetch(state, id) do
       {:ok, user} ->
@@ -58,7 +48,7 @@ defmodule Otomai.Backend.UserRepo do
   @doc """
     Find a user in the repository using its username.
   """
-  @spec find_by_username(username :: String.t) :: {:ok, User.t} | :not_found
+  #spec find_by_username(username :: String.t) :: {:ok, Otomai.User.t} | :not_found
   defcall find_by_username(username) do
     user = state |> Dict.values
                  |> Enum.find(fn(x) -> x.username == username end)

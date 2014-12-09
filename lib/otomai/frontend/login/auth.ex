@@ -48,15 +48,15 @@ defmodule Otomai.Frontend.Login.Auth do
              |> compare_passwords(user.password)
   end
 
-  defp decode_password(password, ticket) do
+  defp decode_password(_password, _ticket) do
     raise "todo"
   end
 
-  defp cipher(password, salt) do
+  defp cipher(_password, _salt) do
     raise "todo"
   end
 
-  defp compare_passwords(left, right) do
+  defp compare_passwords(_left, _right) do
     raise "todo"
   end
 end

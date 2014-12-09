@@ -1,8 +1,30 @@
 defmodule GenGenServer do
   defmacro __using__(_opts \\ []) do
     quote do
-      import GGServer
+      import GenGenServer
       @behaviour :gen_server
+
+      def handle_call(_, _, state) do
+        {:noreply, state}
+      end
+
+      def handle_cast(_, state) do
+        {:noreply, state}
+      end
+
+      def handle_info(_, state) do
+        {:noreply, state}
+      end
+
+      def terminate(_, state) do
+        nil
+      end
+
+      def code_change(_, state, _) do
+        {:ok, state}
+      end
+
+      defoverridable [handle_call: 3, handle_cast: 2, handle_info: 2, terminate: 2, code_change: 3]
     end
   end
 
@@ -10,7 +32,7 @@ defmodule GenGenServer do
     :gen_server.start_link(mod, args, opts)
   end
 
-  def call(ref, req, timeout \\ :infinity) do
+  def call(ref, req, timeout \\ :infinity) do
     :gen_server.call(ref, req, timeout)
   end
 
@@ -54,7 +76,7 @@ defmodule GenGenServer do
         :gen_server.call(ref, [unquote_splicing(params)], timeout)
       end
 
-      def handle_call(unquote(pattern), var!(state)) do
+      def handle_call(unquote(pattern), var!(sender), var!(state)) do
         unquote(block)
       end
     end
@@ -78,13 +100,5 @@ defmodule GenGenServer do
 
   defp signature_params({_, _, _}) do
     []
-  end
-
-  defp signature_clause({:when, _, [_signature, clause]}) do
-    clause
-  end
-
-  defp signature_clause({_, _, _}) do
-    nil
   end
 end

@@ -1,4 +1,5 @@
 defmodule Otomai.Backend do
+  alias Otomai.User
   alias Otomai.Backend.UserRepo
 
   def find_user([id: id]) do
