@@ -6,7 +6,7 @@ defmodule Otomai.Backend do
     UserRepo.find_by_id(UserRepo, id)
   end
 
-  def find_user!([username: username]) do
+  def find_user([username: username]) do
     UserRepo.find_by_username(UserRepo, username)
   end
 
