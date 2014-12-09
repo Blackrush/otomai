@@ -12,7 +12,7 @@ defmodule Otomai.User do
 
   @spec can?(user :: t, action :: atom, subject :: term | nil) :: boolean
   def can?(_user, _action, _subject \\ nil) do
-    raise "todo"
+    true # debug all the things \o/
   end
 
   @spec cannot?(user :: t, action :: atom, subject :: term | nil) :: boolean

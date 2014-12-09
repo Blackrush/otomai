@@ -3,11 +3,12 @@ defmodule Otomai.Frontend.Login.Auth do
 
   alias Otomai.Backend
   alias Otomai.Frontend.Login.Realm
+  alias Otomai.User
 
   def handle(conn, msg) do
     [username, password] = String.split(msg, "\n#1", parts: 2)
 
-    case Backend.find_user!(username: username) |> authenticate(conn, password) do
+    case Backend.find_user(username: username) |> authenticate(conn, password) do
       {:ok, user} ->
         conn |> Conn.set_behaviour(Realm)
              |> Conn.assign(:user, user)
@@ -31,9 +32,13 @@ defmodule Otomai.Frontend.Login.Auth do
     end
   end
 
-  defp authenticate(user, conn, password) do
+  defp authenticate(:not_found, _, _) do
+    {:error, :invalid_credentials}
+  end
+
+  defp authenticate({:ok, user}, conn, password) do
     cond do
-      user == :not_found || not is_valid_password?(user, password, conn.assigns.ticket) ->
+      not is_valid_password?(user, password, conn.assigns.ticket) ->
         {:error, :invalid_credentials}
       User.cannot?(user, :authenticate) ->
         {:error, :not_enough_rights}
@@ -48,15 +53,15 @@ defmodule Otomai.Frontend.Login.Auth do
              |> compare_passwords(user.password)
   end
 
-  defp decode_password(_password, _ticket) do
-    raise "todo"
+  defp decode_password(password, ticket) do
+    Otomai.Crypto.decrypt(password, ticket)
   end
 
-  defp cipher(_password, _salt) do
-    raise "todo"
+  defp cipher(password, _salt) do
+    password # just return the clear password for now
   end
 
-  defp compare_passwords(_left, _right) do
-    raise "todo"
+  defp compare_passwords(left, right) do
+    left == right
   end
 end

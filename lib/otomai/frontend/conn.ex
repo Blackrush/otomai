@@ -16,12 +16,21 @@ defmodule Otomai.Frontend.Conn do
   @doc """
     Send data to a connection.
   """
-  @spec send(conn :: t, data :: binary) :: Conn.t
+  @spec send(conn :: t, data :: [binary] | binary) :: Conn.t
   def send(conn, data)
+
+  def send(conn = %T{halted: false}, list) when is_list(list) do
+    Logger.debug "SND #{inspect list}"
+    do_send(conn, Enum.join(list, "\0") <> "\0")
+  end
 
   def send(conn = %T{halted: false}, data) do
     Logger.debug "SND #{data}"
-    :ok = conn.adapter.send(conn.handle, data <> "\0")
+    do_send(conn, data <> "\0")
+  end
+
+  defp do_send(conn, data) do
+    :ok = conn.adapter.send(conn.handle, data)
     conn
   end
 

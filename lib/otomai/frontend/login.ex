@@ -11,7 +11,9 @@ defmodule Otomai.Frontend.Login do
   end
 
   def connect(conn) do
-    Conn.send(conn, "HCabcdefghijklmnopqrstuvwxyz098765")
+    ticket = rand_ticket
+    conn |> Conn.assign(:ticket, ticket)
+         |> Conn.send("HC#{ticket}")
   end
 
   def handle(conn, "1.29.1") do
@@ -21,5 +23,17 @@ defmodule Otomai.Frontend.Login do
   def handle(conn, _invalid) do
     conn |> Conn.send("AlEv1.29.1")
          |> Conn.close
+  end
+
+  defp rand_ticket(len \\ 32)
+
+  defp rand_ticket(0) do
+    <<>>
+  end
+
+  defp rand_ticket(len) do
+    sigil = :random.uniform(26) + 96
+    << sigil :: utf8,
+       rand_ticket(len - 1) :: binary >>
   end
 end
