@@ -1,14 +1,12 @@
 defmodule Otomai.Backend do
   alias Otomai.Backend.UserRepo
 
-  def find_user!([id: id]) do
-    {:ok, user} = UserRepo.find_by_id(UserRepo, id)
-    user
+  def find_user([id: id]) do
+    UserRepo.find_by_id(UserRepo, id)
   end
 
   def find_user!([username: username]) do
-    {:ok, user} = UserRepo.find_by_username(UserRepo, username)
-    user
+    UserRepo.find_by_username(UserRepo, username)
   end
 
   def insert(user = %User{}) do
