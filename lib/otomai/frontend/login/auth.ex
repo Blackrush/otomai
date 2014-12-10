@@ -12,13 +12,11 @@ defmodule Otomai.Frontend.Login.Auth do
       {:ok, user} ->
         conn |> Conn.set_behaviour(Realm)
              |> Conn.assign(:user, user)
-             |> Conn.send ~w(
-                Ad#{user.nickname}
-                Ac#{user.community}
-                AH1;1;75;1
-                AlK#{if User.can?(user, :show, :console), do: 1, else: 0}
-                AQ#{String.replace(user.secret_question, " ", "+")}
-             )
+             |> Conn.send ~w(Ad#{user.nickname}
+                             Ac#{user.community}
+                             AQ#{String.replace(user.secret_question, " ", "+")}
+                             AlK#{if User.can?(user, :show, :console), do: 1, else: 0})
+             |> Conn.send(Backend.find_realms |> format_host_list)
 
       {:error, :invalid_credentials} ->
         conn |> Conn.send("AlEf") |> Conn.close
@@ -30,6 +28,20 @@ defmodule Otomai.Frontend.Login.Auth do
         # we didnt think of all cases, just close the connection for now
         Conn.close(conn)
     end
+  end
+
+  defp format_host(host) do
+    id         = host.id
+    state      = Realm.state(host)
+    completion = Realm.completion(host)
+    joinable   = if Realm.joinable?(host), do: "1", else: "0"
+
+    "#{id};#{state};#{completion};#{joinable}"
+  end
+
+  defp format_host_list(hosts) do
+    hosts |> Enum.map(&Auth.format_host/1)
+          |> Enum.join("|")
   end
 
   defp authenticate(:not_found, _, _) do
