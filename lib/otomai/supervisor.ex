@@ -14,7 +14,7 @@ defmodule Otomai.Supervisor do
   defp children(config) do
     [
       worker(Otomai.Frontend.Login, [Keyword.get(config, Otomai.Frontend.Login)]),
-      worker(Otomai.Backend.UserRepo, [nil, [name: {:local, Otomai.Backend.UserRepo}]]),
+      supervisor(Otomai.Backend.Supervisor, [config]),
     ]
   end
 end
